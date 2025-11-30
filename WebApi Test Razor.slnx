@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="Configuration/Configuration.csproj" />
+  <Project Path="Encryptions/Encryptions.csproj" />
+  <Project Path="Models/Models.csproj" />
   <Project Path="RazorTest/RazorTest.csproj" />
+  <Project Path="Services/Services.csproj" />
 </Solution>
