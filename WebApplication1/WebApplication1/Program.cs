@@ -1,7 +1,15 @@
+using Configuration.Extensions;
+using Encryption.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Configuration.AddSecrets(builder.Environment);
+builder.Services.AddEncryptions(builder.Configuration);
+builder.Services.AddVersionInfo();
+builder.Services.AddEnvironmentInfo();
 
 var app = builder.Build();
 

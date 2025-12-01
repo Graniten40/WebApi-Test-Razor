@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj": {}
+    "c:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj": {}
   },
   "projects": {
-    "C:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj": {
+    "c:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj",
+        "projectUniqueName": "c:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj",
         "projectName": "Configuration",
-        "projectPath": "C:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj",
+        "projectPath": "c:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\Configuration.csproj",
         "packagesPath": "C:\\Users\\grani\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\obj\\",
+        "outputPath": "c:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Configuration\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

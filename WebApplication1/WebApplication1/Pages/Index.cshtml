@@ -1,10 +1,23 @@
 ﻿@page
+@using Configuration.Options
+@using Microsoft.Extensions.Options
 @model IndexModel
+
+@inject IOptions<VersionOptions> VersionOptions
 @{
     ViewData["Title"] = "Home page";
+    var _version = VersionOptions.Value;
 }
+
+
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
+    <p>Application Description: @_version.Description.()</p>
+    @{for (var i = 0; i < 5; i++)
+       {
+           <p>This is Razor page number @i</p>
+       }
+    }
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>

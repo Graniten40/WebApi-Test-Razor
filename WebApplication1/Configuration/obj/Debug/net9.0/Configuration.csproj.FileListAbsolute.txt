@@ -1,0 +1,13 @@
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\bin\Debug\net9.0\Configuration.deps.json
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\bin\Debug\net9.0\Configuration.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\bin\Debug\net9.0\Configuration.pdb
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.csproj.AssemblyReference.cache
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.AssemblyInfoInputs.cache
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.AssemblyInfo.cs
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.csproj.CoreCompileInputs.cache
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.sourcelink.json
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\refint\Configuration.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\Configuration.pdb
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Configuration\obj\Debug\net9.0\ref\Configuration.dll

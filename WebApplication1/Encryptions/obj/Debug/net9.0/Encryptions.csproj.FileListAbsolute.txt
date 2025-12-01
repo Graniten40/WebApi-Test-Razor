@@ -1,0 +1,16 @@
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\bin\Debug\net9.0\Encryptions.deps.json
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\bin\Debug\net9.0\Encryptions.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\bin\Debug\net9.0\Encryptions.pdb
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\bin\Debug\net9.0\Configuration.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\bin\Debug\net9.0\Configuration.pdb
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.csproj.AssemblyReference.cache
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.AssemblyInfoInputs.cache
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.AssemblyInfo.cs
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.csproj.CoreCompileInputs.cache
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.sourcelink.json
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encrypti.D50ACA11.Up2Date
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\refint\Encryptions.dll
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\Encryptions.pdb
+c:\Users\grani\Desktop\WebApi Test Razor\WebApplication1\Encryptions\obj\Debug\net9.0\ref\Encryptions.dll
