@@ -73,6 +73,11 @@ public class LatinService
         return l;
     }
 
+    public List<LatinSentence> GetLatinSentences()
+    {
+        throw new NotImplementedException();
+    }
+
     #endregion
 }
 
