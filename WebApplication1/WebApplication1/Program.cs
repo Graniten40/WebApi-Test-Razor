@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+builder.Services.AddSingleton<IQuoteService, QuoteService>();
+builder.Services.AddSingleton<IMusicServiceActive, MusicServiceActive>();
 
 builder.Configuration.AddSecrets(builder.Environment);
 builder.Services.AddEncryptions(builder.Configuration);

@@ -1,0 +1,15 @@
+﻿@page
+@model MyApp.Namespace.QuatsModel
+
+<div class="text-center">
+    <h1 class="display-4">Quats</h1>
+
+    <ul class="list-unstyled mt-4">
+        @foreach (var q in Model.Quotes)
+        {
+            <li class="mb-2">
+                "<strong>@q.Quote</strong>" – @q.Author
+            </li>
+        }
+    </ul>
+</div>

@@ -1,0 +1,32 @@
+﻿@page
+@model WebApplication1.Pages.SelectDatasourceModel
+
+<h1>Select source data</h1>
+<p>
+    You can select to read the data directly from a database or from a WebApi.
+    At the page footer you see the currently active datasource.
+</p>
+
+@if (TempData["Message"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<form method="post">
+    <div class="card" style="background-color:#f5e6ff;">
+        <div class="card-header text-center">
+            Select datasource
+        </div>
+        <div class="card-body d-flex">
+            <div class="flex-grow-1">
+                <select asp-for="DataSource" class="form-select">
+                    <option value="SQLDatabase">SQLDatabase</option>
+                    <option value="WebApi">WebApi</option>
+                </select>
+            </div>
+            <div class="ms-3">
+                <button type="submit" class="btn btn-success">Change</button>
+            </div>
+        </div>
+    </div>
+</form>
