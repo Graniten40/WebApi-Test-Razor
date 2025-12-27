@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"path": "../../WebApi Backend"
+		},
+		{
+			"name": "SeedGenerator",
+			"path": "../../WebApi Backend/SeedGenerator"
+		},
+		{
+			"name": "WebAppStudies",
+			"path": "../../WebApi Backend/WebAppStudies"
+		},
+		{
+			"name": "UiTemplate",
+			"path": "../../WebApi Backend/UiTemplate"
+		},
+		{
+			"name": "ProjectB_GoodFriends",
+			"path": "../../WebApi Backend/ProjectB_GoodFriends"
+		},
+		{
+			"name": "ProjectA_GoodMusic",
+			"path": "../../WebApi Backend/ProjectA_GoodMusic"
+		},
+		{
+			"path": "../../WebApi Backend/MvcSecure"
+		}
+	],
+	"settings": {}
+}

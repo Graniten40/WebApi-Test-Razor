@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hqZX/En6HWM=",
+  "dgSpecHash": "Zuy34z93y6k=",
   "success": true,
-  "projectFilePath": "c:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Services\\Services.csproj",
+  "projectFilePath": "C:\\Users\\grani\\Desktop\\WebApi Test Razor\\WebApplication1\\Services\\Services.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\grani\\.nuget\\packages\\azure.core\\1.49.0\\azure.core.1.49.0.nupkg.sha512",
     "C:\\Users\\grani\\.nuget\\packages\\azure.identity\\1.17.0\\azure.identity.1.17.0.nupkg.sha512",
