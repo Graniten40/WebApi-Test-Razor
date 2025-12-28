@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AppUsage\AppUsage.csproj" />
+  <Project Path="SeedGenerator\SeedGenerator.csproj" />
+</Solution>

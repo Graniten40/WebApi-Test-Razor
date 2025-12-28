@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug AppUsage",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dotnet: build",
+            "program": "${workspaceFolder}/AppUsage/bin/Debug/net9.0/AppUsage.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/AppUsage",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}

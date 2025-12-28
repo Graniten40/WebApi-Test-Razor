@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Seido.Utilities.SeedGenerator</PackageId>
+    <Version>1.0.7</Version>
+    <Authors>Martin Lenart</Authors>
+    <Description>A random seeder for C# .NET 9.0 projects and above</Description>
+  </PropertyGroup>
+
+  <!--
+  <ItemGroup>
+    <None Update="master-seeds.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.8" />
+  </ItemGroup>
+</Project>
