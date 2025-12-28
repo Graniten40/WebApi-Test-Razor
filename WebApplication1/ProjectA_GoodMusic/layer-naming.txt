@@ -1,0 +1,26 @@
+Mapping and renaming N-tier layers
+Numberprefix to get right sort order in VSC
+
+* Models layer position depends on relationship between DbModels (DataAccess.EntryModels) and Models (Domain.Models) 
+  You can use either C# inheritance or a tool like Automapper
+
+using inheritance between DataAccess.EntryModels ::  Domain.Models
+AppWebApi           -> 0.Pres.WebApi
+Services            -> 1.App.Services
+DbRepos             -> 2a.DataAccess.Repos
+DbContext           -> 2b.DataAccess.DbContext
+DbModels            -> 2c.DataAccess.EntryModels
+Models              -> 3.Domain.Models *
+Encryptions         -> 4a.CrossCut.Encryptions
+Configuration       -> 4b.CrossCut.Configuration
+
+using Automapper between DataAccess.EntryModels <==>  Domain.Models
+AppWebApi           -> 0.Pres.WebApi
+Services            -> 1.App.Services
+Models              -> 2.Domain.Models *
+DbRepos             -> 3a.DataAccess.Repos
+DbContext           -> 3b.DataAccess.DbContext
+DbModels            -> 3c.DataAccess.EntryModels
+Encryptions         -> 4a.CrossCut.Encryptions
+Configuration       -> 4b.CrossCut.Configuration
+

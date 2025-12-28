@@ -1,0 +1,45 @@
+//launch-docker-all
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "AppRazor",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/AppRazor/bin/Debug/net9.0/AppRazor.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/AppRazor",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:5101;http://localhost:5100"
+            }
+        },
+        {
+            "name": "AppWebApi",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/AppWebApi/bin/Debug/net9.0/AppWebApi.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/AppWebApi",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
+    ]
+}
