@@ -1,15 +1,70 @@
 ﻿@page
 @model IndexModel
+@using System.Linq
 @{
     ViewData["Title"] = "Home page";
 }
 
+@{
+    // Overview: Friends by Country (sum av alla cities per land)
+    var byCountry = Model.Info?.Item?.Friends?
+        .GroupBy(x => x.Country)
+        .Select(g => new { Country = g.Key, Total = g.Sum(x => x.NrFriends) })
+        .OrderByDescending(x => x.Total)
+        .ToList() ?? new();
+}
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>GoodFriends – Project B</p>
 </div>
 
 <hr />
-<h4>API status</h4>
-<pre>@Model.ApiStatus</pre>
 
+@if (Model.Info?.Item?.Db != null)
+{
+    <h4>Database info</h4>
+    <ul>
+        <li>Seeded friends: @Model.Info.Item.Db.NrSeededFriends</li>
+        <li>Friends with address: @Model.Info.Item.Db.NrFriendsWithAddress</li>
+        <li>Pets: @Model.Info.Item.Db.NrSeededPets</li>
+        <li>Quotes: @Model.Info.Item.Db.NrSeededQuotes</li>
+    </ul>
+
+    <hr />
+
+    <p><strong>Conn:</strong> @Model.Info.ConnectionString</p>
+
+    <hr />
+
+    <h4>Overview – Friends by Country</h4>
+
+    @if (byCountry.Count == 0)
+    {
+        <p>No country data.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Total friends</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in byCountry)
+            {
+                <tr>
+                    <td>@row.Country</td>
+                    <td>@row.Total</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <p><strong>No data loaded from API.</strong></p>
+}

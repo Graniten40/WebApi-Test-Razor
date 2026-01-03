@@ -1,0 +1,96 @@
+@page "{id:guid}"
+@model AppRazor.Pages.Friends.EditModel
+@{
+    ViewData["Title"] = "Edit Friend";
+}
+
+<h2>Edit Friend</h2>
+
+@if (Model.ErrorMessage is not null)
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+    <input type="hidden" asp-for="Friend.FriendId" />
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Friend.FirstName"></label>
+        <input class="form-control" asp-for="Friend.FirstName" />
+        <span class="text-danger" asp-validation-for="Friend.FirstName"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Friend.LastName"></label>
+        <input class="form-control" asp-for="Friend.LastName" />
+        <span class="text-danger" asp-validation-for="Friend.LastName"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Friend.Email"></label>
+        <input class="form-control" asp-for="Friend.Email" type="email" />
+        <span class="text-danger" asp-validation-for="Friend.Email"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" asp-for="Friend.Birthday"></label>
+        <input class="form-control" asp-for="Friend.Birthday" type="date" />
+        <span class="text-danger" asp-validation-for="Friend.Birthday"></span>
+    </div>
+
+    <hr />
+    <h5>Address (optional)</h5>
+
+    @if (Model.Friend.Address is null)
+    {
+        <div class="alert alert-info">
+            No address is registered for this friend.
+            <div class="mt-2">
+                <button type="submit" class="btn btn-outline-primary" name="addAddress" value="true">
+                    Add address fields
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label class="form-label" asp-for="Friend.Address.StreetAddress"></label>
+            <input class="form-control" asp-for="Friend.Address.StreetAddress" />
+            <span class="text-danger" asp-validation-for="Friend.Address.StreetAddress"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Friend.Address.ZipCode"></label>
+            <input class="form-control" asp-for="Friend.Address.ZipCode" />
+            <span class="text-danger" asp-validation-for="Friend.Address.ZipCode"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Friend.Address.City"></label>
+            <input class="form-control" asp-for="Friend.Address.City" />
+            <span class="text-danger" asp-validation-for="Friend.Address.City"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Friend.Address.Country"></label>
+            <input class="form-control" asp-for="Friend.Address.Country" />
+            <span class="text-danger" asp-validation-for="Friend.Address.Country"></span>
+        </div>
+    }
+
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-outline-secondary"
+       asp-page="/Friends/Details/Index"
+       asp-route-friendId="@Model.Friend.FriendId">
+        Cancel
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

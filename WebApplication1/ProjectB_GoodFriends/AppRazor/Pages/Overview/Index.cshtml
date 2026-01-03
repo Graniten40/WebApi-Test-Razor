@@ -1,0 +1,113 @@
+@page
+@model AppRazor.Pages.Overview.IndexModel
+@{
+    ViewData["Title"] = "Overview";
+}
+
+<h1>Overview – Friends by Country</h1>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else
+{
+    <!-- ===================== -->
+    <!-- SUMMARY BY COUNTRY -->
+    <!-- ===================== -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Country</th>
+                <th>Total friends</th>
+                <th>Cities</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in Model.Summary)
+        {
+            <tr>
+                <td>@row.Country</td>
+                <td>@row.TotalFriends</td>
+                <td>@row.Cities</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary"
+                       asp-page="/Overview/Index"
+                       asp-route-country="@row.Country">
+                        View cities
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <!-- ===================== -->
+    <!-- FRIENDS + PETS BY CITY -->
+    <!-- ===================== -->
+    @if (!string.IsNullOrWhiteSpace(Model.Country))
+    {
+        <hr />
+        <h2>
+            Friends & Pets in cities of
+            <span class="text-primary">@Model.Country</span>
+        </h2>
+
+        @if (Model.Cities.Any())
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>Friends</th>
+                        <th>Pets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Cities)
+                {
+                    <tr>
+                        <td>@row.City</td>
+                        <td>@row.FriendsCount</td>
+                        <td>@row.PetsCount</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                No city data found for selected country.
+            </div>
+        }
+    }
+
+    <hr />
+
+    <!-- ===================== -->
+    <!-- DETAILS: COUNTRY + CITY -->
+    <!-- ===================== -->
+    <h2>Details – Country + City</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Country</th>
+                <th>City</th>
+                <th>NrFriends</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in Model.Details)
+        {
+            <tr>
+                <td>@row.Country</td>
+                <td>@row.City</td>
+                <td>@row.NrFriends</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

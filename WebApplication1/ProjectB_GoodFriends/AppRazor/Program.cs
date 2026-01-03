@@ -1,3 +1,5 @@
+using AppRazor.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,7 +7,7 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddHttpClient<GoodFriendsApiClient>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5106/"); // ÄNDRA porten till din
+    client.BaseAddress = new Uri("http://localhost:5106/"); 
 });
 
 var app = builder.Build();
@@ -19,6 +21,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseRouting();
 

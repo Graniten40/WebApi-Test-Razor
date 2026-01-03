@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using AppRazor.Models;
+using AppRazor.Services;
 
 namespace AppRazor.Pages;
 
@@ -7,7 +9,7 @@ public class IndexModel : PageModel
     private readonly ILogger<IndexModel> _logger;
     private readonly GoodFriendsApiClient _api;
 
-    public string? ApiStatus { get; private set; }
+    public GuestInfoDto? Info { get; private set; }
 
     public IndexModel(ILogger<IndexModel> logger, GoodFriendsApiClient api)
     {
@@ -19,12 +21,11 @@ public class IndexModel : PageModel
     {
         try
         {
-            ApiStatus = await _api.GetGuestInfoAsync();
+            Info = await _api.GetGuestInfoAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to call AppWebApi");
-            ApiStatus = "API ERROR: " + ex.Message;
         }
     }
 }

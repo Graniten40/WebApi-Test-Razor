@@ -1,0 +1,98 @@
+@page
+@model AppRazor.Pages.Friends.IndexModel
+@{
+    ViewData["Title"] = "Friends";
+}
+
+<h2>Friends</h2>
+
+<form method="get" class="row g-2 align-items-end">
+    <div class="col-md-8">
+        <label class="form-label">Search</label>
+
+        <!-- Du använder Country som filter-sträng (name/email) i din PageModel -->
+        <input class="form-control"
+               name="country"
+               value="@Model.Country"
+               placeholder="Search by name or email (e.g. Ron, gmail)" />
+
+        <div class="form-text">
+            Search matches <strong>name</strong> and <strong>email</strong> (not country/city).
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <button class="btn btn-primary me-2" type="submit">Search</button>
+        <a class="btn btn-outline-secondary" asp-page="/Friends/Index">Clear</a>
+    </div>
+</form>
+
+<hr />
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (Model.Result?.Items == null || Model.Result.Items.Count == 0)
+{
+    <div class="alert alert-warning">No friends found.</div>
+}
+else
+{
+    <p>
+        <strong>Results:</strong> @Model.Result.Items.Count
+        <span class="text-muted">
+            (page @(Model.Result.PageNr + 1) of @(Math.Max(1, Model.Result.TotalPages)))
+        </span>
+    </p>
+
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Seeded</th>
+                <th class="text-end"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var f in Model.Result.Items)
+        {
+            <tr>
+                <td>@f.FullName</td>
+                <td>@f.Email</td>
+                <td>@f.Seeded</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary"
+                       asp-page="/Friends/Details/Index"
+                       asp-route-friendId="@f.FriendId">
+                        Details
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="d-flex gap-2">
+        @if (Model.Result.PageNr > 0)
+        {
+            <a class="btn btn-outline-secondary"
+               asp-page="/Friends/Index"
+               asp-route-pageNr="@(Model.Result.PageNr - 1)"
+               asp-route-country="@Model.Country">
+                Prev
+            </a>
+        }
+
+        @if (Model.Result.PageNr + 1 < Model.Result.TotalPages)
+        {
+            <a class="btn btn-outline-secondary"
+               asp-page="/Friends/Index"
+               asp-route-pageNr="@(Model.Result.PageNr + 1)"
+               asp-route-country="@Model.Country">
+                Next
+            </a>
+        }
+    </div>
+}

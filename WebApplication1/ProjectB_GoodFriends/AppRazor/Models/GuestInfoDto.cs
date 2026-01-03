@@ -1,7 +1,14 @@
+namespace AppRazor.Models;
+
 public class GuestInfoDto
 {
     public string ConnectionString { get; set; } = "";
-    public DbInfo Item { get; set; } = new();
+    public GuestInfoItem Item { get; set; } = new();
+}
+
+public class GuestInfoItem
+{
+    public DbInfo Db { get; set; } = new();
     public List<FriendGroupInfo> Friends { get; set; } = new();
 }
 

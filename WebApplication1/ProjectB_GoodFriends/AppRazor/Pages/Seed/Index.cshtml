@@ -1,0 +1,23 @@
+@page
+@model AppRazor.Pages.Seed.IndexModel
+@{
+    ViewData["Title"] = "Seed";
+}
+
+<h2>Seed database</h2>
+
+<form method="post" asp-page-handler="Seed">
+    <button class="btn btn-primary">Seed</button>
+</form>
+
+<form method="post" asp-page-handler="RemoveSeed" style="margin-top:10px;">
+    <button class="btn btn-danger">Remove Seed</button>
+</form>
+
+@if (TempData["Message"] != null)
+{
+    <hr />
+    <div class="alert alert-info">
+        @TempData["Message"]
+    </div>
+}

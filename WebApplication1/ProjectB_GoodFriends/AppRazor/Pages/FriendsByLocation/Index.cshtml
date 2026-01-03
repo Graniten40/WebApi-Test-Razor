@@ -1,0 +1,71 @@
+@page
+@model AppRazor.Pages.FriendsByLocation.IndexModel
+@{
+    ViewData["Title"] = "Friends by Location";
+}
+
+<h1>Friends – Country and/or City</h1>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-4">
+        <label class="form-label">Country</label>
+        <input class="form-control" name="Country" value="@Model.Country" placeholder="e.g. Sweden" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">City</label>
+        <input class="form-control" name="City" value="@Model.City" placeholder="e.g. Gävle" />
+    </div>
+    <div class="col-md-4">
+        <button class="btn btn-primary me-2" type="submit">Search</button>
+        <a class="btn btn-outline-secondary" asp-page="/FriendsByLocation/Index">Clear</a>
+    </div>
+</form>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (!string.IsNullOrWhiteSpace(Model.Country) || !string.IsNullOrWhiteSpace(Model.City))
+{
+    <p class="text-muted">
+        Showing results for
+        @if (!string.IsNullOrWhiteSpace(Model.Country)) { <strong>Country:</strong> @Model.Country }
+        @if (!string.IsNullOrWhiteSpace(Model.City)) { <span class="ms-2"><strong>City:</strong> @Model.City</span> }
+        <span class="ms-2">(<strong>@Model.Friends.Count</strong> friends)</span>
+    </p>
+
+    @if (Model.Friends.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Country</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var f in Model.Friends)
+            {
+                <tr>
+                    <td>@($"{f.FirstName} {f.LastName}".Trim())</td>
+                    <td>@f.Email</td>
+                    <td>@f.Country</td>
+                    <td>@f.City</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-warning">No friends found for selected filters.</div>
+    }
+}
+else
+{
+    <div class="alert alert-info">
+        Enter a country and/or city to list friends.
+    </div>
+}
