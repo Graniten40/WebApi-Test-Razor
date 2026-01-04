@@ -22,7 +22,7 @@ public class PetReadItemDto
     [JsonPropertyName("mood")]
     public PetMood Mood { get; set; }
 
-    // ✅ Viktigt: relationen kan skickas som friendId, friendIds eller friends
+    // Viktigt: relationen kan skickas som friendId, friendIds eller friends
     [JsonPropertyName("friendId")]
     public Guid? FriendId { get; set; }
 

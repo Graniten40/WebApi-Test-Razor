@@ -1,16 +1,21 @@
 @page
 @model AppRazor.Pages.Friends.IndexModel
+
 @{
     ViewData["Title"] = "Friends";
 }
 
 <h2>Friends</h2>
 
+@* GET-formulär för sök/filter.
+   Eftersom method="get" hamnar parametern i querystring (bra för paging + delbar URL). *@
 <form method="get" class="row g-2 align-items-end">
     <div class="col-md-8">
         <label class="form-label">Search</label>
 
-        <!-- Du använder Country som filter-sträng (name/email) i din PageModel -->
+        @* OBS: I din PageModel används parametern "country" som en generell filter-sträng
+           (för att söka på name/email), inte som land i adress.
+           Vi behåller namnet för kompatibilitet med PageModel/querystring. *@
         <input class="form-control"
                name="country"
                value="@Model.Country"
@@ -22,13 +27,20 @@
     </div>
 
     <div class="col-md-4">
+        @* Submit kör en ny GET med querystring (country=...) *@
         <button class="btn btn-primary me-2" type="submit">Search</button>
+
+        @* Clear navigerar till sidan utan querystring → reset av filter/paging *@
         <a class="btn btn-outline-secondary" asp-page="/Friends/Index">Clear</a>
     </div>
 </form>
 
 <hr />
 
+@* Guard rendering:
+   - Om ErrorMessage finns: visa fel
+   - Om inga resultat: visa "No friends found"
+   - Annars: rendera tabell + paging *@
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
     <div class="alert alert-danger">@Model.ErrorMessage</div>
@@ -39,6 +51,7 @@ else if (Model.Result?.Items == null || Model.Result.Items.Count == 0)
 }
 else
 {
+    @* Visar resultatinfo och aktuell sida (PageNr är 0-baserad i DTO) *@
     <p>
         <strong>Results:</strong> @Model.Result.Items.Count
         <span class="text-muted">
@@ -46,6 +59,7 @@ else
         </span>
     </p>
 
+    @* Tabell med listade friends. "Details" länkar vidare till details-sidan via friendId. *@
     <table class="table table-striped align-middle">
         <thead>
             <tr>
@@ -74,6 +88,8 @@ else
         </tbody>
     </table>
 
+    @* Paging: Prev/Next länkar skickar med pageNr och behåller söksträngen (country)
+       så att filter inte tappas när man bläddrar. *@
     <div class="d-flex gap-2">
         @if (Model.Result.PageNr > 0)
         {

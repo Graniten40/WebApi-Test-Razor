@@ -1,19 +1,26 @@
 @page
 @model AppRazor.Pages.Seed.IndexModel
+
 @{
     ViewData["Title"] = "Seed";
 }
 
 <h2>Seed database</h2>
 
+@* POST-formulär som anropar OnPostSeedAsync i PageModel.
+   Används för att fylla databasen med test-/seed-data. *@
 <form method="post" asp-page-handler="Seed">
     <button class="btn btn-primary">Seed</button>
 </form>
 
+@* POST-formulär som anropar OnPostRemoveSeedAsync i PageModel.
+   Tar bort seed-data från databasen. *@
 <form method="post" asp-page-handler="RemoveSeed" style="margin-top:10px;">
     <button class="btn btn-danger">Remove Seed</button>
 </form>
 
+@* TempData används för att visa ett meddelande efter POST + redirect
+   (t.ex. "Seed completed" eller "Seed removed"). *@
 @if (TempData["Message"] != null)
 {
     <hr />

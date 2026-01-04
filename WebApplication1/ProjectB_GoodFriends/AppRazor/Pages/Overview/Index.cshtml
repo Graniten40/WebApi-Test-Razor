@@ -1,11 +1,13 @@
 @page
 @model AppRazor.Pages.Overview.IndexModel
+
 @{
     ViewData["Title"] = "Overview";
 }
 
 <h1>Overview – Friends by Country</h1>
 
+@* Visar felmeddelande om något gick fel vid laddning av data *@
 @if (Model.ErrorMessage != null)
 {
     <div class="alert alert-danger">@Model.ErrorMessage</div>
@@ -15,6 +17,11 @@ else
     <!-- ===================== -->
     <!-- SUMMARY BY COUNTRY -->
     <!-- ===================== -->
+
+    @* Översikt per land:
+       - Totalt antal friends
+       - Antal unika städer
+       - Länk för att visa city-detaljer för valt land *@
     <table class="table table-striped">
         <thead>
             <tr>
@@ -32,6 +39,8 @@ else
                 <td>@row.TotalFriends</td>
                 <td>@row.Cities</td>
                 <td>
+                    @* Samma sida används, men med country i querystring
+                       → triggar visning av city-detaljer längre ner *@
                     <a class="btn btn-sm btn-outline-primary"
                        asp-page="/Overview/Index"
                        asp-route-country="@row.Country">
@@ -46,6 +55,8 @@ else
     <!-- ===================== -->
     <!-- FRIENDS + PETS BY CITY -->
     <!-- ===================== -->
+
+    @* Denna sektion visas endast om ett land är valt *@
     @if (!string.IsNullOrWhiteSpace(Model.Country))
     {
         <hr />
@@ -56,6 +67,7 @@ else
 
         @if (Model.Cities.Any())
         {
+            @* Sammanfattning per stad inom valt land *@
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -78,6 +90,7 @@ else
         }
         else
         {
+            @* Inga city-detaljer hittades för valt land *@
             <div class="alert alert-warning">
                 No city data found for selected country.
             </div>
@@ -89,6 +102,9 @@ else
     <!-- ===================== -->
     <!-- DETAILS: COUNTRY + CITY -->
     <!-- ===================== -->
+
+    @* Fullständig detaljvy:
+       visar alla kombinationer av land + stad med antal friends *@
     <h2>Details – Country + City</h2>
 
     <table class="table table-striped">

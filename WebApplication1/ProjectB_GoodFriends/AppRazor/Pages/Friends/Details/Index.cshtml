@@ -6,37 +6,31 @@
 @{
     ViewData["Title"] = "Friend details";
 
+    // Route-parametern heter "friendId" pga @page "{friendId:guid}".
+    // Vi läser ut den manuellt här för att kunna återanvända guid:en i länkar/formulär.
     var fidStr = RouteData.Values["friendId"]?.ToString();
+
+     // Säker parsing: om något blir fel landar vi i Guid.Empty och stoppar renderingen längre ner.
     var fid = Guid.TryParse(fidStr, out var g) ? g : Guid.Empty;
 }
 
+@* Visar temporära "flash"-meddelanden (ex: efter lyckad delete/add) *@
+@if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
+{
+    <div class="alert alert-success">@Model.FlashMessage</div>
+}
+
+@* Visar felmeddelanden från PageModel (ex: om API-anrop misslyckas) *@
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
     <div class="alert alert-danger"><pre class="mb-0">@Model.ErrorMessage</pre></div>
 }
-@if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
-{
-    <div class="alert alert-success">@Model.FlashMessage</div>
-}
 
-
+@* Guard clauses: om route eller data är fel vill vi inte försöka rendera resten av sidan *@
 @if (fid == Guid.Empty)
 {
-    <div class="alert alert-danger">
-        Invalid friendId in route.
-    </div>
+    <div class="alert alert-danger">Invalid friendId in route.</div>
     return;
-}
-
-
-@if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
-{
-    <div class="alert alert-success">@Model.FlashMessage</div>
-}
-
-@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
 }
 
 @if (Model.Friend == null)
@@ -49,6 +43,7 @@
 <p><strong>Email:</strong> @Model.Friend.Email</p>
 
 <div class="mb-3">
+    @* Navigerar till Edit-sidan och skickar med id som route-parametern "id" *@
     <a class="btn btn-primary"
        asp-page="/Friends/Edit"
        asp-route-id="@fid">
@@ -63,6 +58,7 @@
     <p><strong>Birthday:</strong> @Model.Friend.Birthday.Value.ToShortDateString()</p>
 }
 
+@* Debug/info-rad: hjälper vid felsökning och visar att relationerna laddats *@
 <p class="text-muted">
     <small>
         FriendId: @fid |
@@ -88,34 +84,41 @@ else
 
 <hr />
 
-<!-- ✅ ADD PET -->
+<!-- ADD PET -->
 <h4 class="mt-3">Add pet</h4>
+@* Formulär som POST:ar till handler-metoden OnPostAddPetAsync i PageModel *@
 <form method="post"
       asp-page-handler="AddPet"
       asp-route-friendId="@fid"
-      novalidate class="row g-2 mb-4">
+      novalidate
+      class="row g-2 mb-4">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="friendId" value="@fid" />
 
-
+    @* Input kopplat till NewPet i PageModel (BindProperty) *@
     <div class="col-md-4">
         <label class="form-label">Name</label>
         <input class="form-control" asp-for="NewPet.Name" />
         <span class="text-danger" asp-validation-for="NewPet.Name"></span>
     </div>
 
+    @* Enum-dropdown (PetKind) *@
     <div class="col-md-3">
         <label class="form-label">Kind</label>
-        <select class="form-select" asp-for="NewPet.Kind"
+        <select class="form-select"
+                asp-for="NewPet.Kind"
                 asp-items="Html.GetEnumSelectList<AppRazor.Models.PetKind>()">
         </select>
+        <span class="text-danger" asp-validation-for="NewPet.Kind"></span>
     </div>
 
+    @* Enum-dropdown (PetMood) *@
     <div class="col-md-3">
         <label class="form-label">Mood</label>
-        <select class="form-select" asp-for="NewPet.Mood"
+        <select class="form-select"
+                asp-for="NewPet.Mood"
                 asp-items="Html.GetEnumSelectList<PetMood>()">
         </select>
+        <span class="text-danger" asp-validation-for="NewPet.Mood"></span>
     </div>
 
     <div class="col-md-2 d-flex align-items-end">
@@ -152,6 +155,8 @@ else
                     }
                 </div>
 
+                @* Delete-knappen öppnar en Bootstrap-modal och skickar med data-* attribut
+                   som JS använder för att fylla hidden input i modalens formulär. *@
                 <button type="button"
                         class="btn btn-sm btn-outline-danger"
                         data-bs-toggle="modal"
@@ -171,15 +176,15 @@ else
 
 <hr />
 
-<!-- ✅ ADD QUOTE -->
+<!-- ADD QUOTE -->
 <h4 class="mt-3">Add quote</h4>
+@* Formulär som POST:ar till handler-metoden OnPostAddQuoteAsync *@
 <form method="post"
       asp-page-handler="AddQuote"
       asp-route-friendId="@fid"
+      novalidate
       class="row g-2 mb-4">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="friendId" value="@fid" />
-
 
     <div class="col-md-8">
         <label class="form-label">Text</label>
@@ -190,6 +195,7 @@ else
     <div class="col-md-3">
         <label class="form-label">Author</label>
         <input class="form-control" asp-for="NewQuote.Author" />
+        <span class="text-danger" asp-validation-for="NewQuote.Author"></span>
     </div>
 
     <div class="col-md-1 d-flex align-items-end">
@@ -219,6 +225,7 @@ else
                     }
                 </div>
 
+                 @* Öppnar quote-modal och skickar med id + text via data-* *@
                 <button type="button"
                         class="btn btn-sm btn-outline-danger"
                         data-bs-toggle="modal"
@@ -236,7 +243,9 @@ else
     <em>No quotes</em>
 }
 
-<!-- ✅ Delete Pet Modal -->
+<!-- Delete Pet Modal -->
+@* Modal med ett POST-formulär som anropar OnPostDeletePetAsync
+   Hidden input fylls av JavaScript när modalen öppnas *@
 <div class="modal fade" id="deletePetModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -266,7 +275,8 @@ else
     </div>
 </div>
 
-<!-- ✅ Delete Quote Modal -->
+<!-- Delete Quote Modal -->
+@* Samma mönster som för pets: modal + hidden input + POST till DeleteQuote *@
 <div class="modal fade" id="deleteQuoteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -300,6 +310,7 @@ else
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        // När pet-modalen öppnas: hämta data från knappen och fyll hidden input + namntext.
         const petModal = document.getElementById('deletePetModal');
         if (petModal) {
             petModal.addEventListener('show.bs.modal', function (event) {
@@ -314,6 +325,7 @@ else
             });
         }
 
+        // När quote-modalen öppnas: fyll hidden input + visa en (ev. kortad) preview av citatet.
         const quoteModal = document.getElementById('deleteQuoteModal');
         if (quoteModal) {
             quoteModal.addEventListener('show.bs.modal', function (event) {
