@@ -86,8 +86,9 @@ namespace AppWebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(Seed)}: {ex.Message}");
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "{Action} failed", nameof(Seed));
+                return BadRequest(ex.ToString()); // TEMP: visar stacktrace
+
             }
         }
 

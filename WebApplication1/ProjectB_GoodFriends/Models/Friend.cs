@@ -1,4 +1,5 @@
-﻿using Seido.Utilities.SeedGenerator;
+﻿using System;
+using Seido.Utilities.SeedGenerator;
 using Models.Interfaces;
 
 namespace Models;
@@ -7,57 +8,53 @@ public class csFriend : IFriend, ISeed<csFriend>
 {
     public virtual Guid FriendId { get; set; }
 
-    public virtual string FirstName { get; set; }
-    public virtual string LastName { get; set; }
+    public virtual string FirstName { get; set; } = string.Empty;
+    public virtual string LastName { get; set; } = string.Empty;
 
-    public virtual string Email { get; set; }
+    public virtual string Email { get; set; } = string.Empty;
     public DateTime? Birthday { get; set; } = null;
 
-    // Model relationships
-    // One Friend may only have one address
-    public virtual IAddress Address { get; set; } = null;
+    // Navigationer finns kvar i modellen – men seedas INTE här
+    public virtual IAddress? Address { get; set; } = null;
+    public virtual System.Collections.Generic.List<IPet> Pets { get; set; } = new();
+    public virtual System.Collections.Generic.List<IQuote> Quotes { get; set; } = new();
 
-    // One Friend may have many favorite pets
-    public virtual List<IPet> Pets { get; set; } = null;
-
-    // One Friend may have many favorite quotes
-    public virtual List<IQuote> Quotes { get; set; } = null;
-
-
-    #region contructors
     public csFriend() { }
 
     public csFriend(csFriend org)
     {
-        this.Seeded = org.Seeded;
+        if (org is null) throw new ArgumentNullException(nameof(org));
 
-        this.FriendId = org.FriendId;
-        this.FirstName = org.FirstName;
-        this.LastName = org.LastName;
-        this.Email = org.Email;
+        Seeded = org.Seeded;
+        FriendId = org.FriendId;
+        FirstName = org.FirstName ?? string.Empty;
+        LastName = org.LastName ?? string.Empty;
+        Email = org.Email ?? string.Empty;
+        Birthday = org.Birthday;
 
-        //use the ternary operator to create only if the orginal is not null
-        this.Address = (org.Address != null)? new Address((Address)org.Address): null;
-
-        //using Linq Select and copy contructor to create a list copy
-        this.Pets = (org.Pets != null) ? org.Pets.Select(p => new Pet((Pet) p)).ToList<IPet>() : null;
+        // Kopiera relationer “för domänbruk” (inte nödvändigt för seed)
+        Address = org.Address;
+        Pets = org.Pets ?? new();
+        Quotes = org.Quotes ?? new();
     }
-    #endregion
 
-    #region randomly seed this instance
     public bool Seeded { get; set; } = false;
 
+    // OBS: Scalar-only seed. Navigationer seedas i DbModels (FriendDbM)
     public virtual csFriend Seed(SeedGenerator sgen)
     {
+        if (sgen is null) throw new ArgumentNullException(nameof(sgen));
+
         Seeded = true;
         FriendId = Guid.NewGuid();
-        FirstName = sgen.FirstName;
-        LastName = sgen.LastName;
-        Email = sgen.Email(FirstName, LastName);
-        Birthday = (sgen.Bool) ? sgen.DateAndTime(1970, 2000) : null;
 
+        FirstName = sgen.FirstName ?? string.Empty;
+        LastName  = sgen.LastName ?? string.Empty;
+        Email     = sgen.Email(FirstName, LastName) ?? string.Empty;
+
+        Birthday = sgen.Bool ? sgen.DateAndTime(1970, 2000) : null;
+
+        // Viktigt: gör inget med Address/Pets/Quotes här.
         return this;
     }
-    #endregion
 }
-

@@ -11,31 +11,50 @@ public class Quote : IQuote, ISeed<Quote>, IEquatable<Quote>
 
     // Model relationships
     // One Quote may have many friends
-    public virtual List<IFriend> Friends { get; set; } = null;
-
+    public virtual List<IFriend> Friends { get; set; } = new List<IFriend>();
 
     #region constructors
+
     public Quote() { }
 
+    // Seed constructor (from Seido SeedGenerator type)
     public Quote(SeededQuote goodQuote)
     {
         QuoteId = Guid.NewGuid();
         QuoteText = goodQuote.Quote;
         Author = goodQuote.Author;
         Seeded = true;
+
+        Friends = new List<IFriend>();
+    }
+
+    // Copy constructor (from your own Quote type)
+    public Quote(Quote org)
+    {
+        Seeded = org.Seeded;
+        QuoteId = org.QuoteId;
+        QuoteText = org.QuoteText;
+        Author = org.Author;
+
+        // Relationship collection should not be null
+        Friends = new List<IFriend>();
     }
 
     #endregion
 
     #region implementing IEquatable
 
-    public bool Equals(Quote other) => (other != null) && ((QuoteText, Author) == (other.QuoteText, other.Author));
+    public bool Equals(Quote other) =>
+        (other != null) && ((QuoteText, Author) == (other.QuoteText, other.Author));
+
     public override bool Equals(object obj) => Equals(obj as Quote);
+
     public override int GetHashCode() => (QuoteText, Author).GetHashCode();
 
     #endregion
 
     #region randomly seed this instance
+
     public bool Seeded { get; set; } = false;
 
     public virtual Quote Seed(SeedGenerator seedGenerator)
@@ -47,9 +66,11 @@ public class Quote : IQuote, ISeed<Quote>, IEquatable<Quote>
         QuoteText = quote.Quote;
         Author = quote.Author;
 
+        // Ensure non-null relationship list even after seed
+        Friends ??= new List<IFriend>();
+
         return this;
     }
+
     #endregion
 }
-
-

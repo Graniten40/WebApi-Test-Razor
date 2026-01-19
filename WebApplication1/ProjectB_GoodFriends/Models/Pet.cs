@@ -2,6 +2,7 @@
 using Models.Interfaces;
 
 namespace Models;
+
 public class Pet : IPet, ISeed<Pet>
 {
     public virtual Guid PetId { get; set; }
@@ -13,22 +14,29 @@ public class Pet : IPet, ISeed<Pet>
 
     // Model relationships
     // One Pet may have an owner Friend
-    public virtual IFriend Friend { get; set; }
-
+    public virtual IFriend? Friend { get; set; } = null;
 
     #region constructors
+
     public Pet() { }
+
     public Pet(Pet org)
     {
-        this.Seeded = org.Seeded;
+        Seeded = org.Seeded;
 
-        this.PetId = org.PetId;
-        this.Kind = org.Kind;
-        this.Name = org.Name;
+        PetId = org.PetId;
+        Kind = org.Kind;
+        Mood = org.Mood;
+        Name = org.Name;
+
+        // Relationship reference is typically not copied in a shallow clone
+        Friend = null;
     }
+
     #endregion
 
     #region randomly seed this instance
+
     public bool Seeded { get; set; } = false;
 
     public virtual Pet Seed(SeedGenerator seedGenerator)
@@ -40,9 +48,11 @@ public class Pet : IPet, ISeed<Pet>
         Kind = seedGenerator.FromEnum<AnimalKind>();
         Mood = seedGenerator.FromEnum<AnimalMood>();
 
+        // Ensure relationship starts as null (set elsewhere when linking to friend)
+        Friend = null;
+
         return this;
     }
+
     #endregion
 }
-
-
