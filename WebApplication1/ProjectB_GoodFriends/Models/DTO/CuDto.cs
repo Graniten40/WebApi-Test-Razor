@@ -58,7 +58,7 @@ public class FriendCuDto
             // Use DateTime.Parse to validate the date by converting back to string and parsing
             var dateString = Birthday.Value.ToString("yyyy-MM-dd");
             var parsedDate = DateTime.Parse(dateString);
-                
+
             // Additional checks for reasonable birthday range
             if (parsedDate != Birthday.Value || parsedDate.Year < 1900 || parsedDate > DateTime.Now)
             {
@@ -147,30 +147,32 @@ public class PetCuDto
 public class QuoteCuDto
 {
     public virtual Guid? QuoteId { get; set; }
-    public virtual string Quote { get; set; }
+
+    // Renamed from Quote -> QuoteText (matches entity/model naming)
+    public virtual string? QuoteText { get; set; }
+
     public virtual string Author { get; set; }
 
     public virtual List<Guid> FriendsId { get; set; } = null;
-
 
     public QuoteCuDto() { }
     public QuoteCuDto(IQuote org)
     {
         QuoteId = org.QuoteId;
 
-        Quote = org.QuoteText;
+        // Mapping matches entity property
+        QuoteText = org.QuoteText;
         Author = org.Author;
 
         FriendsId = org.Friends?.Select(i => i.FriendId).ToList();
     }
 
-
     public void EnsureValidity()
     {
         // RegEx check to ensure filter only contains a-z, 0-9, spaces, and punctuation (.,!?')
-        if (!string.IsNullOrEmpty(Quote) && !Regex.IsMatch(Quote, @"^[a-zA-Z0-9\s.,!?']*$"))
+        if (!string.IsNullOrEmpty(QuoteText) && !Regex.IsMatch(QuoteText, @"^[a-zA-Z0-9\s.,!?']*$"))
         {
-            throw new ArgumentException("Quote can only contain letters (a-z), numbers (0-9), spaces, and punctuation (.,!?').");
+            throw new ArgumentException("QuoteText can only contain letters (a-z), numbers (0-9), spaces, and punctuation (.,!?').");
         }
         if (!string.IsNullOrEmpty(Author) && !Regex.IsMatch(Author, @"^[a-zA-Z0-9\s]*$"))
         {
@@ -178,4 +180,3 @@ public class QuoteCuDto
         }
     }
 }
-

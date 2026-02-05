@@ -1,4 +1,5 @@
-﻿using Seido.Utilities.SeedGenerator;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Seido.Utilities.SeedGenerator;
 using Models.Interfaces;
 
 namespace Models;
@@ -7,17 +8,24 @@ public class Address : IAddress, ISeed<Address>, IEquatable<Address>
 {
     public virtual Guid AddressId { get; set; }
 
-    public virtual string StreetAddress { get; set; }
+    public virtual string StreetAddress { get; set; } = string.Empty;
     public virtual int ZipCode { get; set; }
-    public virtual string City { get; set; }
-    public virtual string Country { get; set; }
+    public virtual string City { get; set; } = string.Empty;
+    public virtual string Country { get; set; } = string.Empty;
 
-    // Model relationships
-    // One Address may have many friends (= one Address can contain several residents)
-    public virtual List<IFriend> Friends { get; set; } = new List<IFriend>();
+    // EF Core navigation: concrete type
+    [NotMapped]
+    public virtual List<csFriend> Friends { get; set; } = new();
+
+    // Interface navigation: keep contract List<IFriend>
+    // (explicit implementation so it doesn't fight with EF)
+    List<IFriend> IAddress.Friends
+    {
+        get => Friends.Cast<IFriend>().ToList();
+        set => Friends = (value ?? new List<IFriend>()).OfType<csFriend>().ToList();
+    }
 
     #region constructors
-
     public Address() { }
 
     public Address(Address org)
@@ -30,26 +38,20 @@ public class Address : IAddress, ISeed<Address>, IEquatable<Address>
         City = org.City;
         Country = org.Country;
 
-        // Do NOT copy relationship objects here; just ensure non-null
-        Friends = new List<IFriend>();
+        Friends = new List<csFriend>();
     }
-
     #endregion
 
     #region implementing IEquatable
-
-    public bool Equals(Address other) =>
+    public bool Equals(Address? other) =>
         (other != null) &&
         ((StreetAddress, ZipCode, City, Country) == (other.StreetAddress, other.ZipCode, other.City, other.Country));
 
-    public override bool Equals(object obj) => Equals(obj as Address);
-
+    public override bool Equals(object? obj) => Equals(obj as Address);
     public override int GetHashCode() => (StreetAddress, ZipCode, City, Country).GetHashCode();
-
     #endregion
 
     #region randomly seed this instance
-
     public bool Seeded { get; set; } = false;
 
     public virtual Address Seed(SeedGenerator seedGenerator)
@@ -62,11 +64,9 @@ public class Address : IAddress, ISeed<Address>, IEquatable<Address>
         ZipCode = seedGenerator.ZipCode;
         City = seedGenerator.City(Country);
 
-        // Ensure non-null relationship list even after seed
-        Friends ??= new List<IFriend>();
+        Friends ??= new List<csFriend>();
 
         return this;
     }
-
     #endregion
 }

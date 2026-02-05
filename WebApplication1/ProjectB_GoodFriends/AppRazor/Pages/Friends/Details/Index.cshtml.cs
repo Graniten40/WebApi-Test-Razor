@@ -253,43 +253,12 @@ public class IndexModel : PageModel
 
         try
         {
-            // Hämtar huvudobjektet (friend). Relationer laddas separat nedan.
             Friend = await _api.GetFriendDetailsAsync(friendId);
 
             if (Friend == null)
             {
-                // Vi returnerar Page() istället för NotFound() för att kunna visa ErrorMessage i UI:t
-                ErrorMessage = $"Friend not found for id={friendId} (seeded mismatch?)";
-                return Page(); // ✅ inte NotFound()
-            }
-
-            // Relationsdata laddas i separata try/catch så att sidan kan renderas även om en del fallerar.
-            // Detta ger bättre UX och mer robust demo vid inlämning.
-
-            try
-            {
-                var quotes = await _api.GetQuotesForFriendAsync(friendId, seeded: SeededMode, flat: false);
-                Friend.Quotes = quotes.ToList();
-                _logger.LogInformation("Loaded {Count} quotes", Friend.Quotes.Count);
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Failed to load quotes");
-                AppendError($"Could not load quotes: {ex.Message}");
-                Friend.Quotes = new();
-            }
-
-            try
-            {
-                var pets = await _api.GetPetsForFriendAsync(friendId, seeded: SeededMode, flat: false);
-                Friend.Pets = pets.ToList();
-                _logger.LogInformation("Loaded {Count} pets", Friend.Pets.Count);
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Failed to load pets");
-                AppendError($"Could not load pets: {ex.Message}");
-                Friend.Pets = new();
+                ErrorMessage = $"Friend not found for id={friendId}";
+                return Page();
             }
 
             return Page();
@@ -301,6 +270,7 @@ public class IndexModel : PageModel
             return Page();
         }
     }
+
 
     // -------------------------------------------------
     // Helpers

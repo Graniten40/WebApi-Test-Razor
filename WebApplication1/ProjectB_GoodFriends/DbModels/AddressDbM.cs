@@ -5,43 +5,47 @@ using Newtonsoft.Json;
 
 using Seido.Utilities.SeedGenerator;
 using Models;
-using Models.Interfaces;    
 using Models.DTO;
 
 namespace DbModels;
 
 [Table("Addresses", Schema = "supusr")]
 [Index(nameof(StreetAddress), nameof(ZipCode), nameof(City), nameof(Country), IsUnique = true)]
-sealed public class AddressDbM : Address, ISeed<AddressDbM>, IEquatable<AddressDbM>
+public sealed class AddressDbM : Address, ISeed<AddressDbM>, IEquatable<AddressDbM>
 {
-    [Key]     
+    [Key]
     public override Guid AddressId { get; set; }
 
     [Required]
-    public override string StreetAddress { get; set; }
+    public override string StreetAddress { get; set; } = string.Empty;
+
     [Required]
     public override int ZipCode { get; set; }
-    [Required]
-    public override string City { get; set; }
-    [Required]
-    public override string Country { get; set; }
 
-    #region implementing IEquatable
-    public bool Equals(AddressDbM other) => (other != null) && ((StreetAddress, ZipCode, City, Country) ==
-        (other.StreetAddress, other.ZipCode, other.City, other.Country));
+    [Required]
+    public override string City { get; set; } = string.Empty;
 
-    public override bool Equals(object obj) => Equals(obj as AddressDbM);
+    [Required]
+    public override string Country { get; set; } = string.Empty;
+
+    #region EF navigation (DbModel-level)
+    // EF Core navigation for the relationship AddressDbM <-> FriendDbM
+    // Do NOT override Address.Friends anymore (it is List<csFriend> in base class).
+    [JsonIgnore]
+    public List<FriendDbM> FriendsDbM { get; set; } = new();
+    #endregion
+
+    #region IEquatable
+    public bool Equals(AddressDbM? other) =>
+        (other != null) &&
+        ((StreetAddress, ZipCode, City, Country) ==
+         (other.StreetAddress, other.ZipCode, other.City, other.Country));
+
+    public override bool Equals(object? obj) => Equals(obj as AddressDbM);
     public override int GetHashCode() => (StreetAddress, ZipCode, City, Country).GetHashCode();
     #endregion
 
-    #region implementing entity Navigation properties when model is using interfaces in the relationships between models
-    [NotMapped]
-    public override List<IFriend> Friends { get => FriendsDbM?.ToList<IFriend>(); set => new NotImplementedException(); }
-    [JsonIgnore]
-    public List<FriendDbM> FriendsDbM { get; set; } = null;
-    #endregion
-
-    #region randomly seed this instance
+    #region seed
     public override AddressDbM Seed(SeedGenerator seedGenerator)
     {
         base.Seed(seedGenerator);
@@ -50,7 +54,7 @@ sealed public class AddressDbM : Address, ISeed<AddressDbM>, IEquatable<AddressD
     #endregion
 
     #region Update from DTO
-    public AddressDbM UpdateFromDTO(AddressCuDto org)
+    public AddressDbM? UpdateFromDTO(AddressCuDto org)
     {
         if (org == null) return null;
 
@@ -65,6 +69,7 @@ sealed public class AddressDbM : Address, ISeed<AddressDbM>, IEquatable<AddressD
 
     #region constructors
     public AddressDbM() { }
+
     public AddressDbM(AddressCuDto org)
     {
         AddressId = Guid.NewGuid();
@@ -72,5 +77,3 @@ sealed public class AddressDbM : Address, ISeed<AddressDbM>, IEquatable<AddressD
     }
     #endregion
 }
-
-

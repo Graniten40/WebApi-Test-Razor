@@ -59,7 +59,7 @@ public class AdminDbRepos
         var fn = Path.GetFullPath(_seedSource);
         var seeder = new SeedGenerator(fn);
 
-        //Seeding the  quotes table
+        //Seeding the quotes table (skapas i minnet)
         var quotes = seeder.AllQuotes.Select(q => new QuoteDbM(q)).ToList();
 
         #region Full seeding
@@ -67,12 +67,36 @@ public class AdminDbRepos
         var friends = seeder.ItemsToList<FriendDbM>(nrOfItems);
         var addresses = seeder.UniqueItemsToList<AddressDbM>(nrOfItems);
 
+        // ✅ VIKTIGT: Lägg in addresses i DbContext så FK kan peka på existerande rows
+        // (Annars blir FK-konflikt när Friends sparas)
+        _dbContext.Addresses.AddRange(addresses);
+
         //Assign Address, Pets and Quotes to all the friends
         foreach (var friend in friends)
         {
+            // Address (kan vara null)
             friend.AddressDbM = (seeder.Bool) ? seeder.FromList(addresses) : null;
+
+            // Pets
             friend.PetsDbM = seeder.ItemsToList<PetDbM>(seeder.Next(0, 4));
-            friend.QuotesDbM = seeder.UniqueItemsPickedFromList(seeder.Next(0, 6), quotes);
+
+            // Quotes: koppla via FriendId/FriendDbM (inte via Quote.Friends)
+            // Quotes: many-to-many -> koppla via Friend.QuotesDbM (join-tabell)
+            var friendQuotes = seeder.UniqueItemsPickedFromList(seeder.Next(0, 6), quotes);
+
+            foreach (var quote in friendQuotes)
+            {
+                // säkerställ att listan finns
+                friend.QuotesDbM ??= new List<QuoteDbM>();
+
+                if (!friend.QuotesDbM.Any(q => q.QuoteId == quote.QuoteId))
+                    friend.QuotesDbM.Add(quote);
+            }
+
+
+            // Valfritt: om FriendDbM har QuotesDbM-lista och du vill att den ska spegla relationen:
+            // friend.QuotesDbM = friendQuotes;
+            // (OBS: bara om din FriendDbM.QuotesDbM är List<QuoteDbM> och INTE triggar Quote.Friends-settern)
         }
 
         //Note that all other tables are automatically set through FriendDbM Navigation properties
@@ -82,6 +106,7 @@ public class AdminDbRepos
         await _dbContext.SaveChangesAsync();
         return await DbInfo();
     }
+
 
     public async Task<ResponseItemDto<GstUsrInfoAllDto>> RemoveSeedAsync(bool seeded)
     {

@@ -360,7 +360,7 @@ namespace AppWebApi.Controllers
                 var _item = await _service.CreateFriendAsync(item);
                 _logger.LogInformation($"item {_item.Item.FriendId} created");
 
-                return Ok(_item);
+                return Ok(_item.Item);
             }
             catch (Exception ex)
             {

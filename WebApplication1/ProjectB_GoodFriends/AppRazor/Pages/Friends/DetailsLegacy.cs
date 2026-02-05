@@ -134,18 +134,6 @@ public class DetailsModel : PageModel
                 return Page();
             }
 
-            // Om quotes inte ingår i details-endpointen kan de laddas separat här.
-            // Vi fångar fel tyst för att inte krascha hela sidan om endpointen saknas/inte behövs.
-            try
-            {
-                var quotes = await _api.GetQuotesForFriendAsync(friendId);
-                Friend.Quotes = quotes.ToList();
-            }
-            catch
-            {
-                // Val: ignorera här, eftersom sidan fortfarande kan fungera utan quotes
-            }
-
             return Page();
         }
         catch (HttpRequestException ex)

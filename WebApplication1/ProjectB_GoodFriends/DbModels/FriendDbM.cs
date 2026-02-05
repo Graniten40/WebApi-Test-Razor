@@ -27,8 +27,9 @@ public sealed class FriendDbM : csFriend, ISeed<FriendDbM>
     [Required]
     public override string Email { get; set; } = string.Empty;
 
+    // FK ska vara optional om Friend kan sakna adress
     [JsonIgnore]
-    public Guid? AddressId { get; set; }
+    public override Guid? AddressId { get; set; }
 
     #region Navigation properties (EF)
 
@@ -36,11 +37,16 @@ public sealed class FriendDbM : csFriend, ISeed<FriendDbM>
     [ForeignKey(nameof(AddressId))]
     public AddressDbM? AddressDbM { get; set; }
 
+    // Basmodellen har Address (domain), vi mappar den till AddressDbM här
     [NotMapped]
-    public override IAddress? Address
+    public override Address? Address
     {
         get => AddressDbM;
-        set => throw new NotImplementedException("Set AddressDbM directly in DbModel.");
+        set
+        {
+            AddressDbM = value as AddressDbM;
+            AddressId = AddressDbM?.AddressId;
+        }
     }
 
     [JsonIgnore]
@@ -71,29 +77,14 @@ public sealed class FriendDbM : csFriend, ISeed<FriendDbM>
     {
         if (sgen is null) throw new ArgumentNullException(nameof(sgen));
 
-        // Viktigt: csFriend.Seed() får inte sätta Address/Pets/Quotes
-        // Den ska bara seeda scalars (FirstName/LastName/Email/Birthday)
+        // Seed endast scalar fields via base
         base.Seed(sgen);
 
-        // Seed EF navigation: AddressDbM
-        AddressDbM ??= new AddressDbM();
-        AddressDbM.Seed(sgen);
-
-        // Seed EF navigation: PetsDbM
+        // Relationer sätts i AdminDbRepos (AddressDbM/PetsDbM/QuotesDbM)
+        // Viktigt: lämna AddressId/AddressDbM orörda här, annars får du FK-trassel.
+        // Se till att navigation-listor inte är null:
         PetsDbM ??= new List<PetDbM>();
-        PetsDbM.Clear();
-        if (sgen.Bool)
-        {
-            PetsDbM.Add(new PetDbM().Seed(sgen));
-        }
-
-        // Seed EF navigation: QuotesDbM
         QuotesDbM ??= new List<QuoteDbM>();
-        QuotesDbM.Clear();
-        if (sgen.Bool)
-        {
-            QuotesDbM.Add(new QuoteDbM().Seed(sgen));
-        }
 
         return this;
     }

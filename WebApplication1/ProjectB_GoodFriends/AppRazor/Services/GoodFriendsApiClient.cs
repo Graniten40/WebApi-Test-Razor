@@ -259,21 +259,26 @@ public class GoodFriendsApiClient
         // Handles multiple possible API shapes for quote-to-friend relation
         bool MatchesFriend(QuoteReadItemDto q)
         {
-            // Case 1: single friendId
-            if (q.FriendId.HasValue && q.FriendId.Value == friendId) return true;
+            if (q == null) return false;
 
-            // Case 2: list of friendIds
-            if (q.FriendIds?.Contains(friendId) == true) return true;
+            // Case 1: single friendId (legacy)
+            if (q.FriendId.HasValue && q.FriendId.Value == friendId)
+                return true;
 
-            // Case 3: embedded friends references
-            if (q.Friends?.Any(f =>
-                    (f.FriendId.HasValue && f.FriendId.Value == friendId) ||
-                    (f.Id.HasValue && f.Id.Value == friendId)
-                ) == true)
+            // Case 2: list of friendIds (new)
+            if (q.FriendIds != null && q.FriendIds.Contains(friendId))
+                return true;
+
+            // Case 3: embedded friends references (new)
+            if (q.Friends != null && q.Friends.Any(f =>
+                    (f.Id.HasValue && f.Id.Value == friendId) ||
+                    (f.FriendId.HasValue && f.FriendId.Value == friendId)   // om du väljer att ha alias
+                ))
                 return true;
 
             return false;
         }
+
 
         var filtered = items
             .Where(MatchesFriend)
@@ -353,18 +358,19 @@ public class GoodFriendsApiClient
     /// </summary>
     public async Task<FriendDetailsDto?> GetFriendDetailsAsync(Guid id)
     {
-        // ✅ Light query: flat=true (avoid heavy joins)
-        // NOTE: seeded flag should match where the friend exists (seeded test data vs "real" data)
-        var friend = await FindFriendByIdLightAsync(id, seeded: true, pageSize: 50, maxPages: 20);
-        if (friend == null)
-            return null;
+        // Hämta friend + pets + quotes i ett enda anrop (detta är bevisat korrekt i Swagger)
+        var url = $"api/Friends/ReadItem?id={Uri.EscapeDataString(id.ToString())}&flat=false";
 
-        // ✅ Load relations separately (smaller endpoints that are known to work)
-        friend.Pets   = (await GetPetsForFriendAsync(id, seeded: false, flat: false, pageNr: 0, pageSize: 200)).ToList();
-        friend.Quotes = (await GetQuotesForFriendAsync(id, seeded: false, flat: false, pageNr: 0, pageSize: 200)).ToList();
+        using var response = await _http.GetAsync(url);
+        await EnsureSuccessWithBodyAsync(response);
 
-        return friend;
+        // Din API returnerar wrapper: { connectionString, item: { ... } }
+        var wrapped = await response.Content.ReadFromJsonAsync<ResponseItemDto<FriendDetailsDto>>(JsonOptions);
+
+        return wrapped?.Item;
     }
+
+
 
     /// <summary>
     /// Helper: iterate Friends/Read pages (flat=true) until a matching FriendId is found.
@@ -496,39 +502,54 @@ public class GoodFriendsApiClient
         var text = (dto.Text ?? "").Trim();
         var author = (dto.Author ?? "").Trim();
 
-        // Try 1: friendIds (many-to-many style)
-        var request1 = new
+        // Viktigast först: det som Swagger visade fungerar:
+        var payloads = new object[]
         {
-            quoteText = text,
-            author = author,
-            friendIds = new[] { friendId }
+            new { quoteText = text, author, friendsId  = new[] { friendId } },
+
+            // fallback-varianter om någon miljö råkar skilja sig
+            new { quoteText = text, author, friendIds  = new[] { friendId } },
+            new { quoteText = text, author, friendsIds = new[] { friendId } },
+            new { quoteText = text, author, FriendsId  = new[] { friendId } },
+            new { quoteText = text, author, FriendsIds = new[] { friendId } },
+
+            // sist: gamla "text"-varianter (men de gav ju null i din miljö)
+            new { text = text, author, friendsId = new[] { friendId } },
         };
 
-        using (var resp1 = await _http.PostAsJsonAsync("api/Quotes/CreateItem", request1, JsonOptions))
+        foreach (var payload in payloads)
         {
-            if (resp1.IsSuccessStatusCode)
+            // ✅ Debug: logga exakt payload som skickas
+            Console.WriteLine("DEBUG AddQuote trying payload: " +
+                            JsonSerializer.Serialize(payload, JsonOptions));
+
+            // Vissa Swagger-anrop använder application/json-patch+json.
+            // PostAsJsonAsync skickar application/json, så vi kör explicit request här.
+            using var req = new HttpRequestMessage(HttpMethod.Post, "api/Quotes/CreateItem")
+            {
+                Content = JsonContent.Create(payload, options: JsonOptions)
+            };
+            req.Content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue("application/json-patch+json");
+
+            using var resp = await _http.SendAsync(req);
+
+            if (resp.IsSuccessStatusCode)
                 return;
 
-            // If it's not 400, treat as a real error and throw with body
-            if ((int)resp1.StatusCode != 400)
-                await EnsureSuccessWithBodyAsync(resp1);
+            var body = await resp.Content.ReadAsStringAsync();
+            Console.WriteLine($"DEBUG AddQuote failed: HTTP {(int)resp.StatusCode} Body: {body}");
 
-            // If 400, log/debug the body and proceed to fallback payload
-            var body1 = await resp1.Content.ReadAsStringAsync();
-            Console.WriteLine($"DEBUG AddQuote friendIds failed: {body1}");
+            // om det inte är 400: kasta direkt (annars fortsätt prova nästa payload)
+            if ((int)resp.StatusCode != 400)
+                await EnsureSuccessWithBodyAsync(resp);
         }
 
-        // Try 2: friendId (singular style)
-        var request2 = new
-        {
-            quoteText = text,
-            author = author,
-            friendId = friendId
-        };
-
-        using var resp2 = await _http.PostAsJsonAsync("api/Quotes/CreateItem", request2, JsonOptions);
-        await EnsureSuccessWithBodyAsync(resp2);
+        throw new HttpRequestException("Could not create quote. No payload variant was accepted.");
     }
+
+
+
 
     // ---------------------------
     // Pets / Delete
@@ -634,12 +655,18 @@ public class GoodFriendsApiClient
     /// </summary>
     private sealed class FriendRefDto
     {
-        [JsonPropertyName("friendId")]
-        public Guid? FriendId { get; set; }
-
         [JsonPropertyName("id")]
         public Guid? Id { get; set; }
+
+        // Bakåtkompatibilitet för äldre kod
+        [JsonIgnore]
+        public Guid? FriendId
+        {
+            get => Id;
+            set => Id = value;
+        }
     }
+
 
     /// <summary>
     /// Internal DTO matching Pets/Read response items.
@@ -668,6 +695,13 @@ public class GoodFriendsApiClient
         [JsonPropertyName("strMood")]
         public string? StrMood { get; set; }
     }
+
+    private sealed class ResponseItemDto<T>
+    {
+        [JsonPropertyName("item")]
+        public T? Item { get; set; }
+    }
+
 
     /// <summary>
     /// Minimal model for ASP.NET Core validation problem details style.

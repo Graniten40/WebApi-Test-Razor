@@ -24,8 +24,6 @@ public class Quote : IQuote, ISeed<Quote>, IEquatable<Quote>
         QuoteText = goodQuote.Quote;
         Author = goodQuote.Author;
         Seeded = true;
-
-        Friends = new List<IFriend>();
     }
 
     // Copy constructor (from your own Quote type)
@@ -35,9 +33,6 @@ public class Quote : IQuote, ISeed<Quote>, IEquatable<Quote>
         QuoteId = org.QuoteId;
         QuoteText = org.QuoteText;
         Author = org.Author;
-
-        // Relationship collection should not be null
-        Friends = new List<IFriend>();
     }
 
     #endregion
