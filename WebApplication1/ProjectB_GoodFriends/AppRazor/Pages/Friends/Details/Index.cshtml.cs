@@ -253,7 +253,7 @@ public class IndexModel : PageModel
 
         try
         {
-            Friend = await _api.GetFriendDetailsAsync(friendId);
+            Friend = await _api.GetFriendDetailsAsync(friendId, seeded: SeededMode);
 
             if (Friend == null)
             {

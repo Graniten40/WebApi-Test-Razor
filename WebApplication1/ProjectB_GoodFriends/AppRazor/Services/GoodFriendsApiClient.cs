@@ -200,13 +200,37 @@ public class GoodFriendsApiClient
     /// - API payload shape differs between environments (friendId, friendIds, friends[]), hence MatchesFriend().
     /// </summary>
     public async Task<IReadOnlyList<QuoteDto>> GetQuotesForFriendAsync(
-        Guid friendId,
-        bool seeded = false,
-        bool flat = false,
-        int pageNr = 0,
-        int pageSize = 200)
+    Guid friendId,
+    bool seeded = false,
+    bool flat = false,
+    int pageNr = 0,
+    int pageSize = 200)
     {
-        // 1) ✅ Server-side filtering (same idea as Pets)
+        bool MatchesFriend(QuoteReadItemDto q)
+        {
+            if (q == null) return false;
+
+            if (q.FriendId.HasValue && q.FriendId.Value == friendId)
+                return true;
+
+            if (q.FriendIds != null && q.FriendIds.Contains(friendId))
+                return true;
+
+            if (q.Friends != null && q.Friends.Any(f => f.Id.HasValue && f.Id.Value == friendId))
+                return true;
+
+            return false;
+        }
+
+        List<QuoteDto> Map(IEnumerable<QuoteReadItemDto> src) =>
+            src.Select(q => new QuoteDto
+            {
+                QuoteId = q.QuoteId,
+                Text = (q.QuoteText ?? "").Trim(),
+                Author = (q.Author ?? "").Trim()
+            }).ToList();
+
+        // 1) Försök "server filter"
         var serverUrl =
             $"api/Quotes/Read?seeded={seeded.ToString().ToLowerInvariant()}" +
             $"&flat={flat.ToString().ToLowerInvariant()}" +
@@ -217,31 +241,22 @@ public class GoodFriendsApiClient
         {
             await EnsureSuccessWithBodyAsync(serverResponse);
 
-            // Read into internal DTO matching the Read endpoint schema
             var serverPage = await serverResponse.Content
                 .ReadFromJsonAsync<ResponsePageDto<QuoteReadItemDto>>(JsonOptions)
                 ?? new ResponsePageDto<QuoteReadItemDto>();
 
             var serverItems = serverPage.Items ?? Array.Empty<QuoteReadItemDto>();
 
-            // Debug prints are useful during development to verify server filtering works
-            Console.WriteLine($"DEBUG Quotes server-filtered count={serverItems.Count} friend={friendId}");
+            // FILTRERA ALLTID client-side, även i server-branch
+            var serverFiltered = serverItems.Where(MatchesFriend).ToList();
 
-            // If the server supports friendId filtering, return the mapped items directly
-            if (serverItems.Count > 0)
-            {
-                return serverItems
-                    .Select(q => new QuoteDto
-                    {
-                        QuoteId = q.QuoteId,
-                        Text = (q.QuoteText ?? "").Trim(),
-                        Author = (q.Author ?? "").Trim()
-                    })
-                    .ToList();
-            }
+            Console.WriteLine($"DEBUG Quotes server returned={serverItems.Count} filtered={serverFiltered.Count} friend={friendId}");
+
+            if (serverFiltered.Count > 0)
+                return Map(serverFiltered);
         }
 
-        // 2) 🔁 Fallback: client-side filtering (if server filter is ignored/unsupported)
+        // 2) Fallback: hämta många och filtrera client-side
         var fallbackUrl =
             $"api/Quotes/Read?seeded={seeded.ToString().ToLowerInvariant()}" +
             $"&flat={flat.ToString().ToLowerInvariant()}" +
@@ -256,44 +271,13 @@ public class GoodFriendsApiClient
 
         var items = fallbackPage.Items ?? Array.Empty<QuoteReadItemDto>();
 
-        // Handles multiple possible API shapes for quote-to-friend relation
-        bool MatchesFriend(QuoteReadItemDto q)
-        {
-            if (q == null) return false;
+        var filtered = items.Where(MatchesFriend).ToList();
 
-            // Case 1: single friendId (legacy)
-            if (q.FriendId.HasValue && q.FriendId.Value == friendId)
-                return true;
+        Console.WriteLine($"DEBUG Quotes fallback returned={items.Count} filtered={filtered.Count} friend={friendId}");
 
-            // Case 2: list of friendIds (new)
-            if (q.FriendIds != null && q.FriendIds.Contains(friendId))
-                return true;
-
-            // Case 3: embedded friends references (new)
-            if (q.Friends != null && q.Friends.Any(f =>
-                    (f.Id.HasValue && f.Id.Value == friendId) ||
-                    (f.FriendId.HasValue && f.FriendId.Value == friendId)   // om du väljer att ha alias
-                ))
-                return true;
-
-            return false;
-        }
-
-
-        var filtered = items
-            .Where(MatchesFriend)
-            .Select(q => new QuoteDto
-            {
-                QuoteId = q.QuoteId,
-                Text = (q.QuoteText ?? "").Trim(),
-                Author = (q.Author ?? "").Trim()
-            })
-            .ToList();
-
-        Console.WriteLine($"DEBUG Quotes fallback count={items.Count} filtered={filtered.Count} friend={friendId}");
-
-        return filtered;
+        return Map(filtered);
     }
+
 
     // ---------------------------
     // Pets (Read + server filter friendId)
@@ -325,9 +309,17 @@ public class GoodFriendsApiClient
 
         var items = page.Items ?? Array.Empty<PetReadApiItemDto>();
 
-        Console.WriteLine($"DEBUG Pets server-filtered count={items.Count} friend={friendId}");
+        // Om API inte skickar friendId så blir allt Guid.Empty och då går det inte att filtrera här.
+        if (items.Any() && items.All(p => p.FriendId == Guid.Empty))
+        {
+            Console.WriteLine("WARN Pets payload contains no friendId. Client-side filtering cannot work.");
+        }
 
-        return items
+        var filtered = items.Where(p => p.FriendId == friendId).ToList();
+
+        Console.WriteLine($"DEBUG Pets server returned={items.Count} filtered={filtered.Count} friend={friendId}");
+
+        return filtered
             .Select(p => new PetDto
             {
                 PetId = p.PetId,
@@ -335,15 +327,14 @@ public class GoodFriendsApiClient
                 // API can return either petName or name depending on version
                 Name = (p.PetName ?? p.Name ?? "").Trim(),
 
-                // In this app PetDto stores enums as ints (UI can show either int or string fields)
                 Kind = (int)p.Kind,
                 Mood = (int)p.Mood,
 
-                // Optional "string versions" of enums from API
                 StrKind = p.StrKind ?? "",
                 StrMood = p.StrMood ?? ""
             })
             .ToList();
+
     }
 
     // ---------------------------
@@ -356,20 +347,19 @@ public class GoodFriendsApiClient
     /// - We avoid heavy "flat=false" friends query because it can timeout in backend.
     /// - Instead: fetch friend "light" via paged list and then load relations (pets/quotes) separately.
     /// </summary>
-    public async Task<FriendDetailsDto?> GetFriendDetailsAsync(Guid id)
+    public async Task<FriendDetailsDto?> GetFriendDetailsAsync(Guid id, bool seeded = true)
     {
-        // Hämta friend + pets + quotes i ett enda anrop (detta är bevisat korrekt i Swagger)
+        // seeded används inte av ReadItem i din miljö (men behåll parametern för signaturen)
         var url = $"api/Friends/ReadItem?id={Uri.EscapeDataString(id.ToString())}&flat=false";
 
         using var response = await _http.GetAsync(url);
         await EnsureSuccessWithBodyAsync(response);
 
-        // Din API returnerar wrapper: { connectionString, item: { ... } }
-        var wrapped = await response.Content.ReadFromJsonAsync<ResponseItemDto<FriendDetailsDto>>(JsonOptions);
+        var wrapped =
+            await response.Content.ReadFromJsonAsync<ResponseItemDto<FriendDetailsDto>>(JsonOptions);
 
         return wrapped?.Item;
     }
-
 
 
     /// <summary>
@@ -676,6 +666,9 @@ public class GoodFriendsApiClient
     {
         [JsonPropertyName("petId")]
         public Guid PetId { get; set; }
+
+        [JsonPropertyName("friendId")]
+        public Guid FriendId { get; set; }
 
         [JsonPropertyName("petName")]
         public string? PetName { get; set; }
